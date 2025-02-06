@@ -1,25 +1,30 @@
 import ddf.minim.*;
+
 Minim minim;
 AudioInput in;
 int textCount = -1;
 int bgDraw, textMove, arms, sensitivity;
-float t, u, angleOffset, radius, linearX, linearY, circularX, circularY, x, y,
-  amplitude, timeFactor, transformFactor, soundVar;
+float t, u, angleOffset, radius, linearX, linearY, circularX, circularY, x, y, amplitude, timeFactor, transformFactor, soundVar;
 String text = "Toon Smokes";
-PFont[] letterFonts;
-boolean[] flippedLetters;
-String[] fontNames = PFont.list();
-PFont[] fonts = new PFont[fontNames.length];
+PFont[] letterFonts, fonts;
+boolean[] flippedLetters, isSpecialChar;
 color[] palette;
-int[] currentColorIndex;
-int[] nextColorIndex;
+int[] currentColorIndex, nextColorIndex;
 float[] colorLerpAmount;
+char[] currentChars;
+char[] specialChars = {
+  '◊',  '●',  '∆', '∏', '∑', '−', '±', '×', '÷', '√', '∞',  '≠', '≤', '≥', '¡', '§', 
+  '¶', '•', '¤', '¦', '©', '®', '™', '‡', '†', '∞', '≈', '≠', 'µ', 'Ω', 'π', '∂', '♪',
+  '&', '@', 'æ', 'Þ', '«'
+};
 
 void setup() {
   size(2000, 1200);
   minim = new Minim(this);
   in = minim.getLineIn();
+  filterFonts();
   newText();
+  println(fonts.length);
   colorMode(HSB);
   newPalette();
   textAlign(CENTER, CENTER);
@@ -34,16 +39,22 @@ void draw() {
   timeFactor = millis() * 0.0005;
   transformFactor = constrain(t / 10.0, 0, 1);
   arms = 38;
-  for(int i = 0; i < 1; i++){
+  for(int i = 0; i < 6; i++){
     pushMatrix();
     rotate(TWO_PI * i / 8 * transformFactor + timeFactor * transformFactor);
     for(int j = 0; j < text.length(); j++){
-      if(frameCount % 10 == 0) {
+      char currentChar = text.charAt(j);
+      if(frameCount % 20 == 0) {
         if(random(100) > 90) {
-          letterFonts[j] = fonts[(int)random(fonts.length)];
+          letterFonts[j] = getRandomFont(currentChar);
           flippedLetters[j] = false;
+          isSpecialChar[j] = false;
         }
         if(random(1000) > 995) flippedLetters[j] = !flippedLetters[j];
+      }
+      if (!isSpecialChar[j] && random(10000) < (currentChar == ' ' ? 20 : 1)) {
+        currentChars[j] = specialChars[(int)random(specialChars.length)];
+        isSpecialChar[j] = true;
       }
       colorLerpAmount[j] += 0.0050;
       if (colorLerpAmount[j] >= 1.0) {
@@ -54,8 +65,7 @@ void draw() {
       textFont(letterFonts[j]);
       soundVar = in.left.get(i) * sensitivity;
       angleOffset = sin(t + j * 0.5) * 0.5 * transformFactor;
-      radius = 150 * transformFactor + sin(t + j * 0.8) * 50 *
-        transformFactor + soundVar;
+      radius = 150 * transformFactor + sin(t + j * 0.8) * 50 * transformFactor + soundVar;
       linearX = (j - text.length() / 2) * 179;
       linearY = 0;
       circularX = cos(j * 0.3 + angleOffset) * radius;
@@ -63,18 +73,17 @@ void draw() {
       x = lerp(linearX, circularX, transformFactor);
       y = lerp(linearY, circularY, transformFactor);
       fill(lerpColor(palette[currentColorIndex[j]], palette[nextColorIndex[j]], colorLerpAmount[j]));
-      textSize(298 + sin(t + j * 0.7) * 10 * transformFactor + amplitude / 10 +
-        abs(soundVar / 5));
+      textSize(298 + sin(t + j * 0.7) * 10 * transformFactor + amplitude / 10 + abs(soundVar / 5));
       pushMatrix();
       translate(x, y);
-      if(flippedLetters[j])scale(-1, 1);
-      text(text.charAt(j), 0, 0);
+      if(flippedLetters[j]) scale(-1, 1);
+      char c = isSpecialChar[j] ? currentChars[j] : text.charAt(j);
+      text(c, 0, -height/2+i*220);
       popMatrix();
     }
     popMatrix();
   }
   if (textMove % 2 == 1) t += 0.01;
-  println(frameRate);
 }
 
 void keyPressed() {
@@ -92,28 +101,77 @@ void keyPressed() {
 void newText() {
   textCount++;
   if(textCount % 3 == 0) text = "Toon Smokes";
-  if(textCount % 3 == 1) text = "Elmer Fudd";
-  if(textCount % 3 == 2) text = "It Hit";
-  for(int i = 0; i < fontNames.length; i++){
-    fonts[i] = createFont(fontNames[i], 64);
-  }
+  if(textCount % 3 == 1) text = "Elmer Fuddd";
+  if(textCount % 3 == 2) text = "It Hitt";
+
   letterFonts = new PFont[text.length()];
   flippedLetters = new boolean[text.length()];
   currentColorIndex = new int[text.length()];
   nextColorIndex = new int[text.length()];
   colorLerpAmount = new float[text.length()];
+  currentChars = new char[text.length()];
+  isSpecialChar = new boolean[text.length()];
+
   for(int i = 0; i < text.length(); i++){
-    letterFonts[i] = fonts[(int)random(fonts.length)];
+    letterFonts[i] = getRandomFont(text.charAt(i));
     flippedLetters[i] = false;
     currentColorIndex[i] = (int)random(5);
     nextColorIndex[i] = (int)random(5);
     colorLerpAmount[i] = random(1.0);
+    currentChars[i] = text.charAt(i);
+    isSpecialChar[i] = false;
   }
 }
 
 void newPalette() {
   palette = new color[5];
   for (int i = 0; i < 5; i++) {
-    palette[i] = color(random(255), 255, 255);
+    palette[i] = color(random(255), 81, 241);
   }
+}
+
+void filterFonts() {
+  String[] nonoFonts = {
+    "Bahnschrift Bold", "Bahnschrift Bold Condensed", "Bahnschrift Bold SemiCondensed",
+    "Bahnschrift Condensed", "Bahnschrift Light", "Bahnschrift Light Condensed",
+    "Bahnschrift Light SemiCondensed", "Bahnschrift Regular", "Bahnschrift SemiBold",
+    "Bahnschrift SemiBold Condensed", "Bahnschrift SemiBold SemiCondensed",
+    "Bahnschrift SemiCondensed", "Bahnschrift SemiLight", "Bahnschrift SemiLight Condensed",
+    "Bahnschrift SemiLight SemiCondensed", "BR Face J1", "BR Face J2", "BR Face J3", "BR Face J4",
+    "BR-OCRB", "HoloLens MDL2 Assets", "Marlett", "PT Dingbats 1", "PT Dingbats 2",
+    "PT Symbol 1", "PT Symbol 2", "Segoe MDL2 Assets", "Symbol", "Webdings", "Wingdings"
+  };
+  String[] fontNames = PFont.list();
+  ArrayList<PFont> filteredFonts = new ArrayList<PFont>();
+
+  for (String fontName : fontNames) {
+    String normalizedFontName = fontName.trim();
+    boolean isNono = false;
+    for (String nono : nonoFonts) {
+      if (normalizedFontName.equalsIgnoreCase(nono.trim())) {
+        isNono = true;
+        break;
+      }
+    }
+    if (!isNono) {
+      filteredFonts.add(createFont(normalizedFontName, 64));
+      if (normalizedFontName.equals("PT Dingbats 3") || normalizedFontName.equals("PT Dingbats 4")) {
+        for (int i = 0; i < 4; i++) {
+          filteredFonts.add(createFont(normalizedFontName, 64));
+        }
+      }
+    }
+  }
+  fonts = filteredFonts.toArray(new PFont[0]);
+}
+
+PFont getRandomFont(char c) {
+  ArrayList<PFont> allowedFonts = new ArrayList<PFont>();
+  for (PFont font : fonts) {
+    String fontName = font.getName();
+    if (c != ' ' || (!fontName.equals("PT Dingbats 3") && !fontName.equals("PT Dingbats 4"))) {
+      allowedFonts.add(font);
+    }
+  }
+  return allowedFonts.get((int)random(allowedFonts.size()));
 }
