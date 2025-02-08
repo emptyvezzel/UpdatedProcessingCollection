@@ -1,5 +1,4 @@
 import ddf.minim.*;
-
 Minim minim;
 AudioInput in;
 int textCount = -1;
@@ -15,16 +14,16 @@ char[] currentChars;
 char[] specialChars = {
   '◊',  '●',  '∆', '∏', '∑', '−', '±', '×', '÷', '√', '∞',  '≠', '≤', '≥', '¡', '§', 
   '¶', '•', '¤', '¦', '©', '®', '™', '‡', '†', '∞', '≈', '≠', 'µ', 'Ω', 'π', '∂', '♪',
-  '&', '@', 'æ', 'Þ', '«'
+  '&', '@', 'æ', 'Þ', '«', '~', '¾', 'ʑ', 'ϕ'
 };
 
 void setup() {
-  size(2000, 1200);
+  fullScreen();
+  //size(2000, 1200);
   minim = new Minim(this);
   in = minim.getLineIn();
   filterFonts();
   newText();
-  println(fonts.length);
   colorMode(HSB);
   newPalette();
   textAlign(CENTER, CENTER);
@@ -100,9 +99,11 @@ void keyPressed() {
 
 void newText() {
   textCount++;
-  if(textCount % 3 == 0) text = "Toon Smokes";
-  if(textCount % 3 == 1) text = "Elmer Fuddd";
-  if(textCount % 3 == 2) text = "It Hitt";
+  if(textCount % 5 == 0) text = "Toon Smokes";
+  if(textCount % 5 == 1) text = "Elmer Fudd";
+  if(textCount % 5 == 2) text = "It Hit";
+  if(textCount % 5 == 3) text = "Perdition";
+  if(textCount % 5 == 4) text = "Seersucker";
 
   letterFonts = new PFont[text.length()];
   flippedLetters = new boolean[text.length()];
