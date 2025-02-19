@@ -5,7 +5,8 @@ int textCount = -1;
 int bgDraw, textMove, arms, sensitivity, textNum, tex, paletteVar;
 float t, u, angleOffset, radius, linearX, linearY, circularX, circularY, x, y, amplitude, 
 timeFactor, transformFactor, soundVar;
-String[] text = {"Toon Smokes", "Elmer Fudd", "It Hit", "Perdition", "Seersucker", "Blue Roofs"};
+String[] text = {"Toon Smokes", "Elmer Fudd", "It Hit", "Perdition", "Seersucker", 
+                 "Blue Roofs", "Floral Sheets"};
 PFont[] letterFonts, fonts;
 boolean[] flippedLetters, isSpecialChar;
 color[] palette;
