@@ -2,9 +2,10 @@ import ddf.minim.*;
 Minim minim;
 AudioInput in;
 int textCount = -1;
-int bgDraw, textMove, arms, sensitivity, textNum, tex;
-float t, u, angleOffset, radius, linearX, linearY, circularX, circularY, x, y, amplitude, timeFactor, transformFactor, soundVar;
-String[] text = {"Toon Smokes", "Elmer Fudd", "It Hit", "Perdition", "Seersucker"};
+int bgDraw, textMove, arms, sensitivity, textNum, tex, paletteVar;
+float t, u, angleOffset, radius, linearX, linearY, circularX, circularY, x, y, amplitude, 
+timeFactor, transformFactor, soundVar;
+String[] text = {"Toon Smokes", "Elmer Fudd", "It Hit", "Perdition", "Seersucker", "Blue Roofs"};
 PFont[] letterFonts, fonts;
 boolean[] flippedLetters, isSpecialChar;
 color[] palette;
@@ -39,47 +40,38 @@ void draw() {
   timeFactor = millis() * 0.0005;
   transformFactor = constrain(t / 10.0, 0, 1);
   arms = 38;
-
   for(int i = 0; i < 6; i++){
     pushMatrix();
-    rotate(TWO_PI * i / 8 * transformFactor + timeFactor * transformFactor);
-    
+    rotate(TWO_PI * i / 8 * transformFactor + timeFactor * transformFactor);    
     for(int j = 0; j < text[tex].length(); j++){
-      char currentChar = text[tex].charAt(j);
-      
+      char currentChar = text[tex].charAt(j);    
       if (letterFonts == null || letterFonts.length <= j || letterFonts[j] == null) {
         letterFonts[j] = getRandomFont(currentChar);
       }
-
       if (flippedLetters == null || flippedLetters.length <= j) {
         flippedLetters = new boolean[text[tex].length()];
       }
-
       if (isSpecialChar == null || isSpecialChar.length <= j) {
         isSpecialChar = new boolean[text[tex].length()];
       }
-
       if(frameCount % 20 == 0) {
-        if(random(100) > 90) {
+        if(random(100) > 96) {
           letterFonts[j] = getRandomFont(currentChar);
           flippedLetters[j] = false;
           isSpecialChar[j] = false;
         }
-        if(random(1000) > 995) flippedLetters[j] = !flippedLetters[j];
+        if(random(1000) > 992) flippedLetters[j] = !flippedLetters[j];
       }
-
       if (!isSpecialChar[j] && random(10000) < (currentChar == ' ' ? 20 : 1)) {
         currentChars[j] = specialChars[(int)random(specialChars.length)];
         isSpecialChar[j] = true;
       }
-
-      colorLerpAmount[j] += 0.0050;
+      colorLerpAmount[j] += 0.0005;
       if (colorLerpAmount[j] >= 1.0) {
         currentColorIndex[j] = nextColorIndex[j];
         nextColorIndex[j] = (int)random(palette.length);
         colorLerpAmount[j] = 0.0;
       }
-
       textFont(letterFonts[j]);
       soundVar = in.left.get(i) * sensitivity;
       angleOffset = sin(t + j * 0.5) * 0.5 * transformFactor;
@@ -90,10 +82,9 @@ void draw() {
       circularY = sin(j * 0.3 + angleOffset) * radius;
       x = lerp(linearX, circularX, transformFactor);
       y = lerp(linearY, circularY, transformFactor);
-
       fill(lerpColor(palette[currentColorIndex[j]], palette[nextColorIndex[j]], colorLerpAmount[j]));
       textSize(298 + sin(t + j * 0.7) * 10 * transformFactor + amplitude / 10 + abs(soundVar / 5));
-      
+     
       pushMatrix();
       translate(x, y);
       if(flippedLetters[j]) scale(-1, 1);
@@ -103,18 +94,19 @@ void draw() {
     }
     popMatrix();
   }
-
+  if (frameCount % 500 == 0) newPalette();
+  if (frameCount % 1200 == 0){
+    textMove++;
+    bgDraw++;
+  }
   if (textMove % 2 == 1) t += 0.01;
+  if(t > 2) resetBg();
 }
 
 void keyPressed() {
   if(key == ' ') bgDraw++;
   if(key == 'b') textMove++;
-  if(key == 'd') {
-    bgDraw = 0;
-    textMove = 0;
-    t = 0;
-  }
+  if(key == 'd') resetBg();
   if (key == 't') {
     textNum++;
     newText();
@@ -150,10 +142,36 @@ void newText() {
 }
 
 void newPalette() {
+  paletteVar++;
   palette = new color[5];
-  for (int i = 0; i < 5; i++) {
-    palette[i] = color(random(255), 81, 241);
+  if(paletteVar % 4 == 0) {
+    palette[0] = #FF00FF;
+    palette[1] = #00FFFF;
+    palette[2] = #CCFF00;
+    palette[3] = #4B0082;
+    palette[4] = #FF4500;
+  } else if(paletteVar % 4 == 1) {
+    palette[0] = #474143;
+    palette[1] = #FFC636;
+    palette[2] = #00ADA9;
+    palette[3] = #FFFFFF;
+    palette[4] = #FF6444;
+  } else if(paletteVar % 4 == 2) {
+    int colRand = round(random(255));
+    for (int i = 0; i < 5; i++) {
+      palette[i] = color(colRand, random(255), random(255));
+    }
+  } else {
+    for (int i = 0; i < 5; i++) {
+      palette[i] = color(random(255), 81, 241);
+    }
   }
+}
+
+void resetBg() {
+  bgDraw = 0;
+  textMove = 0;
+  t = 0;
 }
 
 void filterFonts() {
