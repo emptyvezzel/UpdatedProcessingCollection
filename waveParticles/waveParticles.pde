@@ -1,4 +1,4 @@
-int waveCount, detail, timeShift;
+int waveCount, detail, timeShift, bgDraw;
 float speed, frequency, amplitude, globalTime, chromaShift, yOffset, hueValue, hueOffset;
 color[] palette;
 
@@ -18,7 +18,7 @@ void setup() {
 
 void draw() {
   globalTime += speed;
-  background(0);
+  if (bgDraw % 2 == 0) background(0);
   for(int i = -10; i < waveCount + 10; i++) {
     yOffset = map(i, -10, waveCount + 10, -height * 0.2, height * 1.2); // Ensure full coverage
     hueOffset = (globalTime * 5 + i * 15) % 360; // Scale hue correctly
@@ -37,18 +37,16 @@ void draw() {
 }
 
 void keyPressed() {
-  if (key == 'r') generatePalette();
+  if (key == 'c') generatePalette();
   if (key == 's') speed *= -1; 
-  if (key == 'w') waveCount = int(random(6, 20));
-  if (key == 'f') frequency = random(0.05, 0.2);
-  if (key == 'a') amplitude = random(50, 200);
+  if (key == 'w') waveCount = int(random(1, 20));
+  if (key == 'f') frequency = random(0.001, 0.3);
+  if (key == 'a') amplitude = random(30, 200);
+  if (key == ' ') bgDraw++;
 }
 
 void generatePalette() {
   for(int i = 0; i < 5; i++) {
-    float hue = random(360);
-    float saturation = random(80, 100);
-    float brightness = random(80, 100);
-    palette[i] = color(hue, saturation, brightness);
+    palette[i] = color(random(360), random(50, 100), random(50, 100));
   }
 }
