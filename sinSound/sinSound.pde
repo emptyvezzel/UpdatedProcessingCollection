@@ -10,7 +10,7 @@ float[] amplitudes;
 float t;
 
 void settings(){
-  size(800, 800);
+  size(800, 800);//
 }
 
 void setup(){
