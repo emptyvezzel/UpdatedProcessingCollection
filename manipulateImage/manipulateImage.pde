@@ -13,7 +13,7 @@ int colStatic, drawBg, bgColor, waveMode = 1;
 void setup() {
   size(800, 800, P3D);
   colorMode(HSB);
-  img = loadImage("felix.png");
+  img = loadImage("ts1.png");
   img.resize(width, height);
   minim = new Minim(this);
   in = minim.getLineIn();
